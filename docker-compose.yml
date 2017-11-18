@@ -1,0 +1,49 @@
+version: '2'
+services:
+  web: &web
+    env_file:
+      - .env
+    build: .
+    volumes:
+      - .:/app
+      - ~/.docker/machine/certs:/etc/ssl/docker
+    volumes_from:
+      - bundle
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    environment:
+     - RAILS_ENV=development
+    links:
+      - postgres
+  bundle:
+    image: busybox
+    command: echo Data container for Bundler...
+    volumes:
+      - /bundle
+  postgres_data:
+    image: busybox
+    command: echo Data container for Postgres...
+    volumes:
+      - /var/lib/postgresql/data
+  # redis_data:
+  #   image: busybox
+  #   command: echo Data container for Redis...
+  #   volumes:
+  #     - /data
+  postgres:
+    image: postgres:9.5-alpine
+    ports:
+      - "5432:5432"
+    volumes_from:
+      - postgres_data
+  # redis:
+  #   image: redis
+  #   volumes_from:
+  #     - redis_data
+  # sidekiq:
+  #   <<: *web
+  #   ports: []
+  #   command: sidekiq -C ./config/sidekiq.yml
+
